@@ -1,8 +1,8 @@
-// In config.js
+// config.js
 import { createChatBotMessage } from 'react-chatbot-kit';
 import React from 'react';
 
-// Fix the custom message components
+// Updated custom message components with internal timestamps
 const CustomBotMessage = (props) => {
   // Get current date and time
   const now = new Date();
@@ -20,7 +20,8 @@ const CustomBotMessage = (props) => {
     <div className="react-chatbot-kit-chat-bot-message">
       <div className="react-chatbot-kit-chat-bot-message-arrow"></div>
       <div className="react-chatbot-kit-chat-bot-message-container">
-        <span>{props.message}</span>
+        <span className="message-content">{props.message}</span>
+        <span className="message-time-internal">{time}</span>
       </div>
       <div className="message-metadata">
         <span className="message-date">{date}</span>
@@ -46,7 +47,8 @@ const CustomUserMessage = (props) => {
   return (
     <div className="react-chatbot-kit-chat-user-message">
       <div className="react-chatbot-kit-chat-user-message-container">
-        <span>{props.message}</span>
+        <span className="message-content">{props.message}</span>
+        <span className="message-time-internal">{time}</span>
       </div>
       <div className="message-metadata">
         <span className="message-date">{date}</span>

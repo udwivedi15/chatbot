@@ -1,12 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chatbot Widget Test</title>
+  <meta charset="UTF-8" />
+  <title>Chatbot Test</title>
+  <style>
+    #root {
+      width: 400px;
+      height: 600px;
+      border: 1px solid #ccc;
+      margin: 50px auto;
+    }
+  </style>
 </head>
 <body>
-  <script src="dist/chatbot-widget.js"></script>
-  <my-chatbot></my-chatbot>
+  <div id="root"></div>
+
+  <!-- React and ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <!-- Your bundled chatbot widget (adjust path as needed) -->
+  <script type="module" src="./chatbot-widget.bundle.js"></script>
+
+  <script type="module">
+    import ChatWidget from './chatbot-widget.bundle.js';
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(ChatWidget));
+  </script>
 </body>
 </html>
