@@ -88,21 +88,7 @@ body {
   width: 100% !important;
   height: 100% !important;
   display: flex;
-  /* flex-direction: column-reverse; */
 }
-
-/* Fix for the chat container width */
-/* .react-chatbot-kit-chat-container {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 100% !important;
-}
-
-.react-chatbot-kit-chat-inner-container {
-  width: 10% !important;
-  max-width: 100% !important;
-  min-width: 100% !important;
-} */
 
 .react-chatbot-kit-chat-message-container {
   width: 0%;
@@ -119,7 +105,6 @@ body {
   margin-left: 0px;
 }
 
-/* Enhanced Header with Animated Gradient */
 .chat-header {
   display: flex;
   align-items: center;
@@ -156,21 +141,24 @@ body {
   width: 200px;
   height: 100%;
   transition: width 0.3s ease;
-  /* z-index: 10;  */
-  /* transition: width 0.3s ease; */
-  /* animation: headerWidth 0.3s ease; */
   width: 100px;
-  /* animation: headerWidth 0.3s ease forwards; */
-  /* overflow: hidden; */
-  /* visibility: hidden; */
   padding: 0;
   margin-right: 15px;
-
+}
+.react-chatbot-kit-user-avatar-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-left: 1px;
+    background-color: #3d4e8d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .date-display {
   position: absolute;
-  bottom: -60px; /* Change from -30px to -40px to move it further down */
+  bottom: -60px;
   left: 50%;
   transform: translateX(-50%);
   background-color: var(--background-color);
@@ -198,11 +186,8 @@ body {
 
 .chat-header .bot-avatar {
   margin-right: 0;
-  /* border-radius: 10% */
-  /* width: 40px; */
 }
 
-/* Hide the default header from react-chatbot-kit */
 .react-chatbot-kit-chat-header {
   display: none !important;
 }
@@ -217,13 +202,12 @@ body {
   scroll-behavior: smooth;
   display: flex;
   flex-direction: column;
-  /* justify-content: flex-start; */
   position: relative;
   min-height: 0;
   max-height: calc(100vh - 100px);
   background-color: var(--background-color);
   transition: background-color 0.3s ease;
-  margin-top: 145px; /* Increase from 30px to 40px */
+  margin-top: 145px;
 }
 
 .chatbot-container .react-chatbot-kit-chat-inner-container::-webkit-scrollbar-track {
@@ -238,10 +222,6 @@ body {
   animation: scrollbarPulse 3s infinite;
 }
 
-
-
-
-
 .chatbot-container .react-chatbot-kit-chat-inner-container {
   scrollbar-width: thin;
   scrollbar-color: var(--primary-color) transparent;
@@ -255,7 +235,6 @@ body {
   position: relative;
 }
 
-/* Enhanced Message Animations */
 .react-chatbot-kit-chat-bot-message,
 .react-chatbot-kit-chat-user-message {
   max-width: 80% !important;
@@ -280,6 +259,7 @@ body {
   margin-right: auto !important;
   position: relative;
   border-bottom-left-radius: 4px !important;
+  margin-left: 0px !important; /* Adjusted for bot message spacing */
 }
 
 .react-chatbot-kit-chat-user-message {
@@ -289,6 +269,11 @@ body {
   margin-left: auto !important;
   border-bottom-right-radius: 4px !important;
   transform-origin: bottom right;
+  margin-left: 5px !important; /* Reduced spacing between avatar and user message */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 @keyframes botMessageIn {
@@ -313,7 +298,6 @@ body {
   }
 }
 
-/* Message Hover Effects */
 .react-chatbot-kit-chat-bot-message:hover,
 .react-chatbot-kit-chat-user-message:hover {
   transform: translateY(-2px);
@@ -340,6 +324,8 @@ body {
   right: 0;
   left: auto;
   text-align: right;
+  margin-top: 0 !important; /* Ensure metadata doesn't add vertical space */
+  display: none; /* Already hidden in your original CSS */
 }
 
 .message-date-separator {
@@ -399,22 +385,17 @@ body {
   transform: scale(1.2);
 }
 
-/* Remove the arrow from bot messages */
 .react-chatbot-kit-chat-bot-message-arrow {
   display: none !important;
 }
 
-/* Remove the arrow from user messages */
-/*  */
-
-/* Adjust message styling to account for no arrow */
 .react-chatbot-kit-chat-bot-message {
   max-width: 80% !important;
   word-wrap: break-word !important;
   white-space: pre-wrap !important;
-  padding:5px 16px !important;
+  padding: 5px 16px !important;
   border-radius: 18px !important;
-  margin: 0px 10px 0px 0 !important; /* Reduced bottom margin since timestamp is now inside */
+  margin: 0px 10px 0px 0 !important;
   font-size: 15px;
   line-height: 1.5;
   transition: var(--transition);
@@ -426,7 +407,7 @@ body {
   color: var(--bot-message-text) !important;
   margin-right: auto !important;
   position: relative;
-  border-radius: 18px !important; /* Make all corners rounded */
+  border-radius: 18px !important;
 }
 
 .react-chatbot-kit-chat-user-message {
@@ -447,15 +428,12 @@ body {
   background-color: var(--user-message-bg) !important;
   color: var(--user-message-text) !important;
   margin-left: auto !important;
-  display: flex;               /* 👈 Add this */
-  align-items: center;         /* 👈 Vertically center */
-  justify-content: center;     /* 👈 Horizontally center */
-  text-align: center;          /* 👈 Optional: center multiline text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
-
-
-/* Remove the old timestamp styles since they're now inside the bubbles */
 .message-metadata {
   display: none;
 }
@@ -522,7 +500,6 @@ body {
   color: white;
 }
 
-/* Enhanced Input Container with Floating Animation */
 .react-chatbot-kit-chat-input-container {
   position: fixed !important;
   bottom: 0 !important;
@@ -537,8 +514,8 @@ body {
   z-index: 100;
   transition: background-color 0.3s ease;
   animation: floatInput 6s ease-in-out infinite;
-  left: 0 !important; /* Ensure it's aligned to the left */
-  right: 0 !important; /* Ensure it spans the full width */
+  left: 0 !important;
+  right: 0 !important;
 }
 
 @keyframes floatInput {
@@ -558,11 +535,10 @@ body {
   align-items: center !important;
   width: 100% !important;
   max-width: 100% !important;
-  padding: 0 !important; /* Remove any padding */
-  margin: 0 !important; /* Remove any margin */
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
-/* Enhanced Input with Focus Animation */
 .react-chatbot-kit-chat-input {
   flex-grow: 1 !important;
   padding: 12px 16px !important;
@@ -574,8 +550,8 @@ body {
   color: var(--text-color) !important;
   background-color: var(--input-bg) !important;
   box-shadow: var(--shadow);
-  margin: 0 !important; /* Remove any margin */
-  width: 100% !important; /* Ensure it takes full width */
+  margin: 0 !important;
+  width: 100% !important;
 }
 
 .react-chatbot-kit-chat-input:focus {
@@ -584,25 +560,10 @@ body {
   transform: translateY(-1px);
 }
 
-
-
-
-
-
-
 .voice-input-button:hover {
   opacity: 0.8;
   transform: scale(1.1);
 }
-
-/* Enhanced Send Button with Arrow Animation */
-
-
-
-
-
-
-
 
 @keyframes gradientShift {
   0% {
@@ -616,40 +577,6 @@ body {
   }
 }
 
-/* Hide any child elements like injected text or icons */
-/* .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send > * {
-  display: none !important;
-} */
-
-/* Remove the default send icon */
-/* .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send::before {
-  display: none !important;
-} */
-
-/* Draw an animated arrow */
-
-/* Hover effect for the button and arrow */
-/* .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25), inset 0 -2px 5px rgba(0, 0, 0, 0.1) !important;
-} */
-
-/* Arrow animation on hover */
-/* .react-chatbot-kit-chat-input-container
-  .react-chatbot-kit-chat-input-form
-  .react-chatbot-kit-chat-btn-send:hover::after {
-  transform: translate(-50%, -30%);
-  border-bottom-width: 12px;
-} */
-
-
-/* Active state */
-/* .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send:active {
-  transform: translateY(0) scale(0.95);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2), inset 0 -1px 3px rgba(0, 0, 0, 0.1) !important;
-} */
-
-/* Enhanced Typing Indicator with Animation */
 .typing-indicator {
   display: flex;
   align-items: flex-end;
@@ -735,7 +662,6 @@ body {
   }
 }
 
-/* Add this to your existing CSS file */
 @keyframes fadeOut {
   from {
     opacity: 1;
@@ -746,7 +672,6 @@ body {
   }
 }
 
-/* Enhanced Quick Replies with Hover Animation */
 .quick-replies {
   display: flex;
   gap: 10px;
@@ -789,7 +714,6 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Enhanced Dark Mode Toggle with Animation */
 .dark-mode-toggle {
   background: none;
   border: none;
@@ -824,7 +748,6 @@ body {
   transform: rotate(360deg);
 }
 
-/* Enhanced Clear Chat Button with Animation */
 .clear-chat-button {
   background: none;
   border: none;
@@ -858,12 +781,11 @@ body {
   transform: rotate(-360deg);
 }
 
-/* Enhanced Scroll to Bottom Button with Animation */
 .scroll-to-bottom {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: absolute; /* Keep as absolute to stay within the chatbot container */
+  bottom: 80px; /* Keep the vertical position above the input bar */
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%); /* Adjust to center the button */
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -878,24 +800,24 @@ body {
   z-index: 100;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   opacity: 1;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  animation: fadeIn 0.5s ease-out; /* Smooth appearance */
 }
 
+.scroll-to-bottom:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  animation: none;
+}
 
+.scroll-to-bottom:active {
+  transform: translateY(0) scale(0.95);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
 
-/* Add to your App.css file - Internal timestamp styling */
 .message-content {
   display: block;
-  margin-bottom: 16px; /* Space for the timestamp */
+  margin-bottom: 16px;
   word-break: break-word;
 }
 
@@ -908,28 +830,21 @@ body {
   padding: 0 10px;
 }
 
-/* Position the timestamp differently for bot vs user messages */
 .react-chatbot-kit-chat-bot-message-container .message-time-internal {
   right: 4px;
   text-align: right;
-  color: rgba(255, 255, 255, 0.8); /* For bot messages on blue background */
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .react-chatbot-kit-chat-user-message-container .message-time-internal {
   right: 4px;
   text-align: right;
-  color: rgba(0, 0, 0, 0.6); /* For user messages on light background */
+  color: rgba(0, 0, 0, 0.6);
 }
 
-/* Dark mode adjustments */
 .dark-mode .react-chatbot-kit-chat-user-message-container .message-time-internal {
   color: rgba(25, 255, 255, 0.7);
 }
-
-
-
-
-
 
 @keyframes bounce {
   0%,
@@ -947,19 +862,6 @@ body {
   }
 }
 
-.scroll-to-bottom:hover {
-  background-color: var(--primary-hover);
-  transform: translateY(-2px) translateX(-50%) scale(1.1);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  animation: none;
-}
-
-.scroll-to-bottom:active {
-  transform: translateY(0) translateX(-50%) scale(0.95);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-/* Responsive Design */
 @media (max-width: 600px) {
   .react-chatbot-kit-chat-bot-message,
   .react-chatbot-kit-chat-user-message {
@@ -970,7 +872,7 @@ body {
 
   .chatbot-container .react-chatbot-kit-chat-inner-container {
     max-height: calc(100vh - 110px);
-    overflow-y: auto; 
+    overflow-y: auto;
   }
 
   .react-chatbot-kit-chat-input-container {
@@ -989,7 +891,6 @@ body {
   }
 }
 
-/* Additional Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -1003,7 +904,6 @@ body {
   display: none;
 }
 
-/* Fix for time display on bot messages */
 .date-display {
   font-size: 14px;
   font-weight: 600;
@@ -1015,9 +915,8 @@ body {
   box-shadow: var(--shadow);
   width: fit-content;
   text-align: center;
-  }
+}
 
-/* New Animations for Message Appearance */
 .react-chatbot-kit-chat-bot-message {
   animation: slideInLeft 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
@@ -1048,7 +947,6 @@ body {
   }
 }
 
-/* Shimmer Effect for Loading States */
 .shimmer {
   background: linear-gradient(
     90deg,
@@ -1069,7 +967,6 @@ body {
   }
 }
 
-/* Floating Animation for Messages */
 .floating {
   animation: floating 3s ease-in-out infinite;
 }
@@ -1086,7 +983,6 @@ body {
   }
 }
 
-/* Ripple Effect for Button Clicks */
 .ripple {
   position: relative;
   overflow: hidden;
@@ -1115,7 +1011,6 @@ body {
   transition: 0s;
 }
 
-/* 3D Tilt Effect for Messages on Hover */
 .tilt-effect {
   transition: transform 0.2s ease;
   transform-style: preserve-3d;
@@ -1125,11 +1020,7 @@ body {
   transform: perspective(1000px) rotateX(2deg) rotateY(2deg);
 }
 
-/* Add this media query section at the end of your CSS file */
-
-/* Media Queries for Different Screen Sizes */
 @media screen and (max-width: 768px) {
-  /* Tablet and smaller devices */
   .react-chatbot-kit-chat-input-container {
     padding: 10px !important;
     height: 60px;
@@ -1139,15 +1030,9 @@ body {
     padding: 10px 14px !important;
     font-size: 14px !important;
   }
-
-  /* .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send {
-    width: 36px !important;
-    height: 36px !important;
-  } */
 }
 
 @media screen and (max-width: 480px) {
-  /* Mobile devices */
   .react-chatbot-kit-chat-input-container {
     padding: 8px !important;
     height: 55px;
@@ -1158,17 +1043,6 @@ body {
     font-size: 14px !important;
     border-radius: 20px !important;
   }
-
-  /* .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send {
-    width: 32px !important;
-    height: 32px !important;
-  } */
-
-  /* .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send::after {
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    border-left: 8px solid var(--send-button-text);
-  } */
 
   .chat-header {
     padding: 10px;
@@ -1182,7 +1056,6 @@ body {
 }
 
 @media screen and (max-width: 320px) {
-  /* Small mobile devices */
   .react-chatbot-kit-chat-input-container {
     padding: 6px !important;
     height: 50px;
@@ -1192,15 +1065,8 @@ body {
     padding: 6px 10px !important;
     font-size: 13px !important;
   }
-
-  /* .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send {
-    width: 28px !important;
-    height: 28px !important;
-    margin-left: 6px !important;
-  } */
 }
 
-/* Header control buttons styling */
 .header-control-buttons {
   display: flex;
   align-items: center;
@@ -1229,7 +1095,6 @@ body {
   transform: translateY(0);
 }
 
-/* Tooltip styling */
 .tooltip {
   position: relative;
   display: inline-block;
@@ -1252,7 +1117,7 @@ body {
   transition: opacity 0.3s;
   font-size: 12px;
 }
-/* ChatGPT-style Send Button */
+
 .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send {
   margin-left: 10px !important;
   padding: 10px !important;
@@ -1267,51 +1132,111 @@ body {
   height: 32px !important;
   display: flex !important;
   align-items: center !important;
-  /* justify-content: center !important; */
   position: relative !important;
   box-shadow: none !important;
 }
 
-/* Simple upward arrow */
 .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send::before {
   content: "↑" !important;
-  font-size:23px !important;
-  display: block !important;
+  font-size: 23px !important;
+  display: inline-flex !important;
   color: var(--send-button-text) !important;
-  
 }
 
-/* Hide any child elements */
 .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send > * {
   display: none !important;
 }
 
-/* Simple hover effect */
 .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send:hover {
   background-color: var(--send-button-hover) !important;
   transform: translateY(-2px);
 }
 
-/* Simple active state */
 .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send:active {
   transform: scale(0.95);
 }
+
 .tooltip:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
 }
-/* Decrease distance between avatar and message */
+
 .react-chatbot-kit-chat-bot-avatar {
-  margin-right: 0px !important; /* Reduce from default */
+  margin-right: -9px !important;
 }
 
-/* Adjust the bot message container to be closer to avatar */
 .react-chatbot-kit-chat-bot-message {
-  margin-left: 0px !important; /* Reduce left margin to move closer to avatar */
+  margin-left: 0px !important;
 }
 
-/* Make sure the avatar is properly aligned */
 .react-chatbot-kit-chat-bot-avatar-container {
   display: flex;
   align-items: center;
+}
+
+.typing {
+  display: flex;
+  gap: 5px;
+  padding: 10px;
+  align-items: center;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: #999;
+  border-radius: 50%;
+  animation: bounce 1.2s infinite ease-in-out;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+  }
+  40% {
+    transform: scale(1.2);
+  }
+}
+
+/* Adjustments for user avatar spacing */
+.react-chatbot-kit-chat-user-avatar {
+  margin-right: 5px !important; /* Reduced spacing between user avatar and message */
+}
+
+.react-chatbot-kit-chat-user-message-container {
+  display: flex;
+  align-items: center;
+  margin-left: 0 !important; /* Remove extra left margin on container */
+}
+
+.react-chatbot-kit-chat-user-avatar-container {
+  padding: 0 !important; /* Ensure no extra padding affects spacing */
+}
+.react-chatbot-kit-user-avatar-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-left: 12;
+    background-color: #3d4e8d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.react-chatbot-kit-user-avatar-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-left: 1;
+    background-color: #3d4e8d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

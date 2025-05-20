@@ -11,7 +11,9 @@ import ActionProvider from "./ActionProvider";
 function App() {
   const [isMaximized, setIsMaximized] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false); // New state for button visibility
   const formRef = useRef(null);
+  const chatContainerRef = useRef(null); // Ref for the chat message container
 
   useEffect(() => {
     if (darkMode) {
@@ -30,6 +32,25 @@ function App() {
       setDarkMode(true);
     }
 
+    // Scroll event listener to show/hide the button
+    const handleScroll = () => {
+      if (chatContainerRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+        // Show button if not at the bottom (with a small threshold)
+        if (scrollHeight - scrollTop - clientHeight > 50) {
+          setShowScrollButton(true);
+        } else {
+          setShowScrollButton(false);
+        }
+      }
+    };
+
+    const chatContainer = document.querySelector(".react-chatbot-kit-chat-message-container");
+    if (chatContainer) {
+      chatContainerRef.current = chatContainer;
+      chatContainer.addEventListener("scroll", handleScroll);
+    }
+
     // Event listener for custom send button if needed
     const form = formRef.current;
     if (form) {
@@ -46,6 +67,12 @@ function App() {
         });
       }
     }
+
+    return () => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.removeEventListener("scroll", handleScroll);
+      }
+    };
   }, [darkMode]);
 
   const formattedDate = new Date().toLocaleDateString("en-US", {
@@ -65,6 +92,16 @@ function App() {
     window.location.reload();
   };
 
+  // Function to scroll to the bottom
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <div className={`App ${darkMode ? "dark-mode" : ""}`}>
       <div className="chatbot-wrapper">
@@ -82,7 +119,6 @@ function App() {
                 aria-label="Toggle dark mode"
               >
                 {darkMode ? (
-                  // Sun icon
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -105,7 +141,6 @@ function App() {
                     <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                   </svg>
                 ) : (
-                  // Moon icon
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -155,6 +190,30 @@ function App() {
             ref={formRef}
             placeholderText="Type your message here..."
           />
+
+          {/* Scroll to Bottom Button */}
+          {showScrollButton && (
+            <button
+              onClick={scrollToBottom}
+              className="scroll-to-bottom"
+              aria-label="Scroll to bottom"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 5v14"></path>
+                <path d="M5 12l7 7 7-7"></path>
+              </svg>
+            </button>
+          )}
         </div>
       </div>
     </div>
