@@ -1255,7 +1255,7 @@ body {
 /* ChatGPT-style Send Button */
 .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send {
   margin-left: 10px !important;
-  padding: 0 !important;
+  padding: 10px !important;
   background-color: var(--send-button-bg) !important;
   border-radius: 4px !important;
   font-size: 20px !important;
