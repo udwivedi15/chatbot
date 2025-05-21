@@ -11,22 +11,27 @@ import ActionProvider from "./ActionProvider";
 function App() {
   const [isMaximized, setIsMaximized] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-  const [showScrollButton, setShowScrollButton] = useState(false); // New state for button visibility
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const formRef = useRef(null);
-  const chatContainerRef = useRef(null); // Ref for the chat message container
+  const chatContainerRef = useRef(null);
+  const inputRef = useRef(null);
+  const observerRef = useRef(null);
 
   useEffect(() => {
+    // Dark mode handling
     if (darkMode) {
       document.body.classList.add("dark-mode");
     } else {
       document.body.classList.remove("dark-mode");
     }
 
+    // Load saved messages
     const savedMessages = localStorage.getItem("chatHistory");
     if (savedMessages) {
       config.initialMessages = JSON.parse(savedMessages);
     }
 
+    // Load dark mode preference
     const savedDarkMode = localStorage.getItem("darkMode");
     if (savedDarkMode === "true") {
       setDarkMode(true);
@@ -36,7 +41,6 @@ function App() {
     const handleScroll = () => {
       if (chatContainerRef.current) {
         const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
-        // Show button if not at the bottom (with a small threshold)
         if (scrollHeight - scrollTop - clientHeight > 50) {
           setShowScrollButton(true);
         } else {
@@ -51,26 +55,73 @@ function App() {
       chatContainer.addEventListener("scroll", handleScroll);
     }
 
-    // Event listener for custom send button if needed
-    const form = formRef.current;
-    if (form) {
-      const customSendButton = form.querySelector(
-        ".react-chatbot-kit-chat-input-form::after"
-      );
-      if (customSendButton) {
-        form.addEventListener("submit", (e) => {
-          e.preventDefault();
-          const input = form.querySelector(".react-chatbot-kit-chat-input");
-          if (input.value.trim()) {
-            form.dispatchEvent(new Event("submit", { cancelable: true }));
+    // Function to attach keydown event listener
+    const attachKeydownListener = () => {
+      const inputField = document.querySelector(".react-chatbot-kit-chat-input");
+      const sendButton = document.querySelector(".react-chatbot-kit-chat-btn-send");
+      if (inputField && sendButton) {
+        inputRef.current = inputField;
+        inputField.addEventListener("keydown", (event) => {
+          console.log("Key pressed:", event.key, "Shift:", event.shiftKey);
+          if (event.key === "Enter") {
+            if (!event.shiftKey) {
+              // Enter (without Shift): Send the message
+              event.preventDefault();
+              
+              if (inputField.value.trim()) {
+                console.log("Sending message:", inputField.value);
+                sendButton.click();
+              }
+            } else {
+              // Shift + Enter: Allow default behavior (new line)
+              console.log("Adding new line");
+              event.stopPropagation();
+            }
           }
         });
       }
+    };
+
+    // Delay to ensure DOM is rendered
+    const timer = setTimeout(() => {
+      attachKeydownListener();
+    }, 500);
+
+    // Use MutationObserver to reattach listener if input field changes
+    const formContainer = document.querySelector(".react-chatbot-kit-chat-input-container");
+    if (formContainer) {
+      observerRef.current = new MutationObserver(() => {
+        const inputField = document.querySelector(".react-chatbot-kit-chat-input");
+        if (inputField && inputField !== inputRef.current) {
+          console.log("Input field changed, reattaching listener");
+          attachKeydownListener();
+        }
+      });
+      observerRef.current.observe(formContainer, { childList: true, subtree: true });
     }
 
+    // Prevent default form submission unless triggered intentionally
+    const form = formRef.current?.querySelector(".react-chatbot-kit-chat-input-form");
+    if (form) {
+      form.addEventListener("submit", (event) => {
+        const input = form.querySelector(".react-chatbot-kit-chat-input");
+        if (!input.value.trim()) {
+          event.preventDefault(); // Prevent submission if input is empty
+        }
+      });
+    }
+
+    // Cleanup on unmount
     return () => {
+      clearTimeout(timer);
       if (chatContainerRef.current) {
         chatContainerRef.current.removeEventListener("scroll", handleScroll);
+      }
+      if (inputRef.current) {
+        inputRef.current.removeEventListener("keydown", () => {});
+      }
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
     };
   }, [darkMode]);
@@ -92,7 +143,6 @@ function App() {
     window.location.reload();
   };
 
-  // Function to scroll to the bottom
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo({
@@ -191,7 +241,6 @@ function App() {
             placeholderText="Type your message here..."
           />
 
-          {/* Scroll to Bottom Button */}
           {showScrollButton && (
             <button
               onClick={scrollToBottom}

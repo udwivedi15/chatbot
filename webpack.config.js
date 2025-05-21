@@ -3,11 +3,14 @@ const path = require('path');
 module.exports = {
   entry: './src/widget.js',
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'chatbot-widget.js',
-    library: 'ChatbotWidget',
-    libraryTarget: 'umd',
-    globalObject: 'this',
+    path: path.resolve(__dirname, ''), // Output to root directory
+    filename: 'chatbot-widget.bundle.js', // Match the filename in index.html
+    library: {
+      type: 'module', // Output as ES module
+    },
+  },
+  experiments: {
+    outputModule: true, // Enable ES module output
   },
   module: {
     rules: [
@@ -23,7 +26,7 @@ module.exports = {
       },
       {
         test: /\.css$/, // Handle CSS files
-        use: ['style-loader', 'css-loader'], // Use style-loader and css-loader
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },
