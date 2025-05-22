@@ -1,13 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
-reportWebVitals();
+function init() {
+  const container = document.getElementById('chat-content');
+  const chatContainer = document.getElementById('chat-container');
+
+  if (container && chatContainer) {
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
+    
+    // Show the chat-container after the app is mounted
+    setTimeout(() => {
+      chatContainer.style.display = 'block';
+    }, 0);
+  }
+}
+
+// Export globally for your HTML
+window.ChatWidgetModule = { init };
