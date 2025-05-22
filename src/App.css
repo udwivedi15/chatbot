@@ -17,6 +17,7 @@
   --send-button-bg: #0084ff;
   --send-button-hover: #0069d9;
   --send-button-text: #ffffff;
+  --glow-color: rgba(0, 132, 255, 0.15); /* New glow color for light mode */
 }
 
 .dark-mode {
@@ -33,6 +34,7 @@
   --send-button-bg: #005bb5;
   --send-button-hover: #004a92;
   --send-button-text: #ffffff;
+  --glow-color: rgba(0, 91, 181, 0.25); /* New glow color for dark mode */
 }
 
 html,
@@ -78,10 +80,23 @@ body {
   height: 90vh !important;
   border-radius: 0 !important;
   overflow: hidden;
-  background: var(--background-color);
+  background: radial-gradient(circle at center, var(--glow-color) 0%, var(--background-color) 70%) !important;
   transition: var(--transition);
   position: relative;
   box-shadow: var(--shadow);
+  animation: backgroundGlow 6s ease-in-out infinite; /* New glow animation */
+}
+
+@keyframes backgroundGlow {
+  0% {
+    background: radial-gradient(circle at center, var(--glow-color) 0%, var(--background-color) 70%);
+  }
+  50% {
+    background: radial-gradient(circle at center, var(--glow-color) 20%, var(--background-color) 80%);
+  }
+  100% {
+    background: radial-gradient(circle at center, var(--glow-color) 0%, var(--background-color) 70%);
+  }
 }
 
 .chatbot-container .react-chatbot-kit-chat-container {
@@ -205,7 +220,7 @@ body {
   position: relative;
   min-height: 0;
   max-height: calc(100vh - 100px);
-  background-color: var(--background-color);
+  background-color: transparent; /* Ensure inner container doesn't override glow */
   transition: background-color 0.3s ease;
   margin-top: 145px;
 }
@@ -835,7 +850,7 @@ body {
 }
 
 .dark-mode .react-chatbot-kit-chat-user-message-container .message-time-internal {
-  color: rgba(25, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 @keyframes bounce {
@@ -1142,6 +1157,10 @@ body {
 .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send:hover {
   background-color: var(--send-button-hover) !important;
   transform: translateY(-2px);
+}
+
+.react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send:active {
+  transform: scale(0.95);
 }
 
 .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send:active {
