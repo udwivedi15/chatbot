@@ -1,5 +1,5 @@
 const dataset = [
-  { question: "Hello", answer: "How may i assist you."},
+  { question: "Hello", answer: "Hii"},
   { question: "What's your name?", answer: "I'm Buddy, your friendly chatbot!" },
   { question: "How are you?", answer: "I'm doing awesome, thanks for asking! How about you?" },
   { question: "Tell me a joke", answer: "Why did the scarecrow become a programmer? Because he was outstanding in his field!" },

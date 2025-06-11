@@ -1,21 +1,39 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
+import { createRoot } from 'react-dom/client';
+import App from './App'; // Importing the default export
 
-function init() {
-  const container = document.getElementById('chat-content');
-  const chatContainer = document.getElementById('chat-container');
+let root = null;
 
-  if (container && chatContainer) {
-    const root = ReactDOM.createRoot(container);
-    root.render(<App />);
-    
-    // Show the chat-container after the app is mounted
-    setTimeout(() => {
-      chatContainer.style.display = 'block';
-    }, 0);
+function init(options = {}) {
+  const containerId = options.elementId || 'chat-content';
+  const wrapperId = options.wrapperId || 'chat-container';
+
+  const container = document.getElementById(containerId);
+  const wrapper = document.getElementById(wrapperId);
+
+  if (!container) {
+    console.error(`ChatWidgetModule: container element '${containerId}' not found.`);
+    return;
+  }
+
+  try {
+    if (!root) {
+      root = createRoot(container);
+      root.render(<App />); // Using the imported App component
+    }
+
+    if (wrapper) {
+      setTimeout(() => {
+        wrapper.style.display = 'block';
+      }, 0);
+    }
+  } catch (err) {
+    console.error('ChatWidgetModule: failed to initialize:', err);
   }
 }
 
-// Export globally for your HTML
-window.ChatWidgetModule = { init };
+if (typeof window !== 'undefined') {
+  window.ChatWidgetModule = { init };
+}
+
+export { init };

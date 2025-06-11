@@ -1,30 +1,48 @@
-// config.js
 import { createChatBotMessage } from 'react-chatbot-kit';
 import React from 'react';
+import './App.css';
 
-// Updated custom message components with internal timestamps
+// Custom Bot Message Component
 const CustomBotMessage = (props) => {
-  // Get current date and time
   const now = new Date();
-  const date = now.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  });
   const time = now.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: 'numeric',
     hour12: true,
   });
 
+  const handleCopyClick = () => {
+    props.onCopy?.(props.id, props.message);
+  };
+
+  const handleLikeClick = () => {
+    props.onLike?.(props.id);
+  };
+
   return (
     <div className="react-chatbot-kit-chat-bot-message">
-      <div className="react-chatbot-kit-chat-bot-message-arrow"></div>
       <div className="react-chatbot-kit-chat-bot-message-container">
-        <span className="message-content">{props.message}</span>
+        <span className="bot-text-wrapper">{props.message}</span>
         <span className="message-time-internal">{time}</span>
+
+        <div className="message-options">
+          <button
+            className={`option-button like-button ${props.isLiked ? 'liked' : ''}`}
+            onClick={handleLikeClick}
+            title="Like"
+          >
+            👍
+          </button>
+          <button
+            className={`option-button copy-button ${props.isCopied ? 'copied' : ''}`}
+            onClick={handleCopyClick}
+            title={props.isCopied ? "Copied!" : "Copy"}
+          >
+            📋
+          </button>
+        </div>
       </div>
       <div className="message-metadata">
-        <span className="message-date">{date}</span>
         <span className="message-time">{time}</span>
       </div>
     </div>
@@ -32,12 +50,7 @@ const CustomBotMessage = (props) => {
 };
 
 const CustomUserMessage = (props) => {
-  // Get current date and time
   const now = new Date();
-  const date = now.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  });
   const time = now.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: 'numeric',
@@ -51,25 +64,38 @@ const CustomUserMessage = (props) => {
         <span className="message-time-internal">{time}</span>
       </div>
       <div className="message-metadata">
-        <span className="message-date">{date}</span>
         <span className="message-time">{time}</span>
       </div>
     </div>
   );
 };
 
-// Update your config object
+const createMessageWithId = (text, options = {}) => {
+  return {
+    ...createChatBotMessage(text, options),
+    id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+  };
+};
+
 const config = {
   initialMessages: [
-    createChatBotMessage("Hey! I'm here to help you."),
+    createMessageWithId("Hey! I'm here to help you.", { delay: 500 }),
   ],
   customComponents: {
-    // Fix the custom message components
     botChatMessage: CustomBotMessage,
     userChatMessage: CustomUserMessage,
+    minimizeButton: (props) => (
+      <button {...props} className="minimize-button" title="Minimize">–</button>
+    ),
+    maximizeButton: (props) => (
+      <button {...props} className="maximize-button" title="Maximize">⤢</button>
+    ),
+    closeButton: (props) => (
+      <button {...props} className="close-button" title="Close">✕</button>
+    ),
   },
-  
-  // Keep any other existing config properties
 };
 
 export default config;
+
+

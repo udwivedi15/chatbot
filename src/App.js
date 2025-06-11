@@ -1,3 +1,4 @@
+/* App.js */
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -14,15 +15,21 @@ function App({ onReady }) {
     return savedDarkMode === "true";
   });
   const [isMaximized, setIsMaximized] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [likedMessages, setLikedMessages] = useState({});
+  const [copiedMessages, setCopiedMessages] = useState({});
+  const [copyStatus, setCopyStatus] = useState({}); // Track copy success/failure per message
   const formRef = useRef(null);
   const chatContainerRef = useRef(null);
   const inputRef = useRef(null);
   const observerRef = useRef(null);
   const keydownHandlerRef = useRef(null);
+  const dateObserverRef = useRef(null);
 
   useEffect(() => {
-    if (onReady) onReady(); // ✅ Notify parent that chatbot has rendered
+    if (onReady) onReady();
 
     if (darkMode) {
       document.body.classList.add("dark-mode");
@@ -32,7 +39,12 @@ function App({ onReady }) {
 
     const savedMessages = localStorage.getItem("chatHistory");
     if (savedMessages) {
-      config.initialMessages = [...JSON.parse(savedMessages)];
+      const parsedMessages = JSON.parse(savedMessages);
+      const updatedMessages = parsedMessages.map((msg, index) => ({
+        ...msg,
+        id: msg.id || `restored_${Date.now()}_${index}`,
+      }));
+      config.initialMessages = updatedMessages;
     }
 
     const handleScroll = () => {
@@ -42,10 +54,56 @@ function App({ onReady }) {
       }
     };
 
-    const chatContainer = document.querySelector(".react-chatbot-kit-chat-message-container");
-    if (chatContainer) {
-      chatContainerRef.current = chatContainer;
-      chatContainer.addEventListener("scroll", handleScroll);
+    const injectDate = () => {
+      const chatContainer = document.querySelector(".react-chatbot-kit-chat-message-container");
+      if (chatContainer) {
+        chatContainerRef.current = chatContainer;
+        chatContainer.addEventListener("scroll", handleScroll);
+
+        if (!chatContainer.querySelector(".date-display")) {
+          const formattedDate = new Date().toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          });
+          const dateDiv = document.createElement("div");
+          dateDiv.className = "date-display";
+          dateDiv.textContent = formattedDate;
+          chatContainer.insertBefore(dateDiv, chatContainer.firstChild);
+        }
+      }
+    };
+
+    const observer = new MutationObserver((mutations, obs) => {
+      const chatContainer = document.querySelector(".react-chatbot-kit-chat-message-container");
+      if (chatContainer) {
+        injectDate();
+        obs.disconnect();
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+    dateObserverRef.current = observer;
+
+    const chatContainerObserver = new MutationObserver(() => {
+      const chatContainer = document.querySelector(".react-chatbot-kit-chat-message-container");
+      if (chatContainer && !chatContainer.querySelector(".date-display")) {
+        const formattedDate = new Date().toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        const dateDiv = document.createElement("div");
+        dateDiv.className = "date-display";
+        dateDiv.textContent = formattedDate;
+        chatContainer.insertBefore(dateDiv, chatContainer.firstChild);
+      }
+    });
+
+    const chatInnerContainer = document.querySelector(".react-chatbot-kit-chat-inner-container");
+    if (chatInnerContainer) {
+      chatContainerObserver.observe(chatInnerContainer, { childList: true, subtree: true });
     }
 
     const attachKeydownListener = () => {
@@ -60,12 +118,10 @@ function App({ onReady }) {
         }
 
         const handler = (event) => {
-          if (event.key === "Enter") {
-            if (!event.shiftKey) {
-              event.preventDefault();
-              if (inputField.value.trim()) {
-                sendButton.click();
-              }
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            if (inputField.value.trim()) {
+              sendButton.click();
             }
           }
         };
@@ -111,24 +167,40 @@ function App({ onReady }) {
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
+      if (dateObserverRef.current) {
+        dateObserverRef.current.disconnect();
+      }
+      chatContainerObserver.disconnect();
     };
   }, [darkMode, onReady]);
-
-  const formattedDate = new Date().toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-
-  const toggleMaximize = () => setIsMaximized(!isMaximized);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     localStorage.setItem("darkMode", !darkMode);
   };
 
-  const clearChat = () => {
-    localStorage.removeItem("chatHistory");
-    window.location.reload();
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+    setIsMinimized(false);
+  };
+
+  const toggleMinimize = () => {
+    setIsMinimized(true);
+    setIsMaximized(false);
+    setIsFullscreen(false);
+  };
+
+  const toggleMaximize = () => {
+    setIsMaximized(true);
+    setIsMinimized(false);
+    setIsFullscreen(false);
+  };
+
+  const closeChat = () => {
+    setIsMinimized(false);
+    setIsMaximized(false);
+    setIsFullscreen(false);
+    document.querySelector(".App").style.display = "none";
   };
 
   const scrollToBottom = () => {
@@ -140,16 +212,81 @@ function App({ onReady }) {
     }
   };
 
+  const handleLike = (messageId) => {
+    console.log('Liking message with ID:', messageId);
+    setLikedMessages((prev) => ({
+      ...prev,
+      [messageId]: !prev[messageId],
+    }));
+  };
+
+  const handleCopy = async (messageId, text) => {
+    console.log('Copy button clicked for message ID:', messageId, 'Text:', text);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        console.log('Successfully copied to clipboard');
+        setCopiedMessages((prev) => ({
+          ...prev,
+          [messageId]: true,
+        }));
+        setCopyStatus((prev) => ({
+          ...prev,
+          [messageId]: 'Copied!',
+        }));
+      } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          console.log('Fallback: Successfully copied to clipboard');
+          setCopiedMessages((prev) => ({
+            ...prev,
+            [messageId]: true,
+          }));
+          setCopyStatus((prev) => ({
+            ...prev,
+            [messageId]: 'Copied!',
+          }));
+        } catch (err) {
+          console.error('Fallback: Failed to copy', err);
+          setCopyStatus((prev) => ({
+            ...prev,
+            [messageId]: 'Failed to copy',
+          }));
+        }
+        document.body.removeChild(textArea);
+      }
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      setCopyStatus((prev) => ({
+        ...prev,
+        [messageId]: 'Failed to copy',
+      }));
+    }
+
+    // Reset the status after 2 seconds
+    setTimeout(() => {
+      setCopiedMessages((prev) => ({
+        ...prev,
+        [messageId]: false,
+      }));
+      setCopyStatus((prev) => ({
+        ...prev,
+        [messageId]: undefined,
+      }));
+    }, 2000);
+  };
+
   return (
-    <div className={`App ${darkMode ? "dark-mode" : ""}`}>
+    <div className={`App ${darkMode ? "dark-mode" : ""} ${isMaximized ? "" : isMinimized ? "minimized" : ""} ${isFullscreen ? "fullscreen" : ""}`}>
       <div className="chatbot-wrapper">
-        <button onClick={toggleMaximize} className="maximize-button">
-          {isMaximized ? "Minimize" : "Maximize"}
-        </button>
-        <div className={`chatbot-container ${isMaximized ? "maximized" : ""}`}>
+        <div className="chatbot-container">
           <div className="chat-header">
-            <div>Conversation with Bot</div>
-            <div className="date-display">{formattedDate}</div>
+            <div className="header-title">Grok</div>
             <div className="header-buttons">
               <button
                 onClick={toggleDarkMode}
@@ -174,18 +311,72 @@ function App({ onReady }) {
                   </svg>
                 )}
               </button>
-              <button onClick={clearChat} className="clear-chat-button" aria-label="Clear chat">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 6h18"></path>
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+              <button
+                onClick={toggleMinimize}
+                className="minimize-button"
+                aria-label="Minimize chat"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
+              </button>
+              <button
+                onClick={toggleMaximize}
+                className="maximize-button"
+                aria-label="Maximize chat"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                </svg>
+              </button>
+              <button
+                onClick={closeChat}
+                className="close-button"
+                aria-label="Close chat"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+              <button
+                onClick={toggleFullscreen}
+                className="fullscreen-toggle"
+                aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+              >
+                {isFullscreen ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 3h6v6M9 3h12v12M21 9v12H9M3 15v6h12" />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
 
           <Chatbot
-            config={config}
+            config={{
+              ...config,
+              customComponents: {
+                ...config.customComponents,
+                botChatMessage: (props) => {
+                  console.log('botChatMessage props:', props);
+                  return (
+                    <config.customComponents.botChatMessage
+                      {...props}
+                      onLike={handleLike}
+                      isLiked={likedMessages[props.id] || false}
+                      onCopy={handleCopy}
+                      isCopied={copiedMessages[props.id] || false}
+                      copyStatus={copyStatus[props.id] || 'Copy'} // Pass copy status
+                    />
+                  );
+                },
+              },
+            }}
             messageParser={MessageParser}
             actionProvider={ActionProvider}
             saveMessages={(messages) =>
@@ -195,7 +386,7 @@ function App({ onReady }) {
             placeholderText="Type your message here..."
           />
 
-          {showScrollButton && (
+          {showScrollButton && (isMaximized || isFullscreen) && (
             <button
               onClick={scrollToBottom}
               className="scroll-to-bottom"
