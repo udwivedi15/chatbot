@@ -1,27 +1,30 @@
 class MessageParser {
   constructor(actionProvider, state) {
-    this.actionProvider = actionProvider
-    this.state = state
+    this.actionProvider = actionProvider;
+    this.state = state;
   }
 
   parse(message) {
     try {
-      const lowerCaseMessage = message.toLowerCase().trim()
+      console.log("MessageParser received message:", message); // Add log to confirm message receipt
+      const lowerCaseMessage = message.toLowerCase().trim();
       if (!lowerCaseMessage) {
-        this.actionProvider.handleEmptyMessage()
-        return
+        console.log("Empty message detected, calling handleEmptyMessage");
+        this.actionProvider.handleEmptyMessage();
+        return;
       }
 
       // Show typing indicator immediately
-      this.actionProvider.showTypingIndicator()
+      this.actionProvider.showTypingIndicator();
 
       // Call GPT-based backend directly
-      this.actionProvider.handleMessage(lowerCaseMessage)
+      console.log("Passing message to ActionProvider:", lowerCaseMessage);
+      this.actionProvider.handleMessage(lowerCaseMessage);
     } catch (error) {
-      console.error("Error parsing message:", error)
-      this.actionProvider.handleError()
+      console.error("Error parsing message:", error);
+      this.actionProvider.handleError();
     }
   }
 }
 
-export default MessageParser
+export default MessageParser;

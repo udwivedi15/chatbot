@@ -1,5 +1,5 @@
 :root {
-  --primary-color: #0084ff;
+  --primary-color: hsl(208, 89%, 7%);
   --primary-hover: #0069d9;
   --background-color: #f5f7fa;
   --input-bg: #ffffff;
@@ -94,9 +94,10 @@
 }
 
 .react-chatbot-kit-chat-message-container {
-  width: 100% !important;
-  margin-bottom: 60px;
+  width: 80% !important;
+  margin-bottom: 0px;
   position: relative;
+  margin: 0 auto;
   overflow: auto;
   overflow-y: auto;
   white-space: pre-wrap;

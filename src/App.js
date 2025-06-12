@@ -197,9 +197,8 @@ function App({ onReady }) {
   };
 
   const closeChat = () => {
-    setIsMinimized(false);
     setIsMaximized(false);
-    setIsFullscreen(true);
+    setIsFullscreen(false);
     setIsMinimized(true);
 
   };
