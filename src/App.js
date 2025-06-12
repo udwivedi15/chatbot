@@ -199,8 +199,9 @@ function App({ onReady }) {
   const closeChat = () => {
     setIsMinimized(false);
     setIsMaximized(false);
-    setIsFullscreen(false);
-    document.querySelector(".App").style.display = "none";
+    setIsFullscreen(true);
+    setIsMinimized(true);
+
   };
 
   const scrollToBottom = () => {
@@ -286,7 +287,7 @@ function App({ onReady }) {
       <div className="chatbot-wrapper">
         <div className="chatbot-container">
           <div className="chat-header">
-            <div className="header-title">Grok</div>
+            <div className="header-title">Chatbot</div>
             <div className="header-buttons">
               <button
                 onClick={toggleDarkMode}
@@ -311,6 +312,7 @@ function App({ onReady }) {
                   </svg>
                 )}
               </button>
+              
               <button
                 onClick={toggleMinimize}
                 className="minimize-button"

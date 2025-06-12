@@ -891,11 +891,24 @@
   box-shadow: none !important;
 }
 
-.react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send::before {
-  content: "↑" !important; /* or use content: "\2191" !important; */
-  font-size: 20px !important;
-  display: inline-flex !important;
-  color: var(--send-button-text) !important;
+.react-chatbot-kit-chat-input-container 
+.react-chatbot-kit-chat-input-form 
+.react-chatbot-kit-chat-btn-send::before {
+  content: "\f1d8"; /* Paper plane icon */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 18px;
+  color: #0084ff; /* Messenger blue */
+  transform: rotate(45deg); /* Tilt like Messenger */
+  display: inline-block;
+  transition: color 0.3s ease;
+  margin-left: 2px;
+}
+
+.react-chatbot-kit-chat-input-container 
+.react-chatbot-kit-chat-input-form 
+.react-chatbot-kit-chat-btn-send:hover::before {
+  color: #006aff; /* Slightly darker on hover */
 }
 
 .react-chatbot-kit-chat-input-container .react-chatbot-kit-chat-input-form .react-chatbot-kit-chat-btn-send > * {
