@@ -1,3 +1,5 @@
+import { createMessageWithId } from './config'; // Import createMessageWithId
+
 class ActionProvider {
   constructor(createChatBotMessage, setStateFunc, createClientMessage) {
     this.createChatBotMessage = createChatBotMessage;
@@ -6,15 +8,15 @@ class ActionProvider {
   }
 
   showTypingIndicator = () => {
-    this.setState((prevState) => ({
-      ...prevState,
+    this.setState((prev) => ({
+      ...prev,
       isTyping: true,
     }));
   };
 
   hideTypingIndicator = () => {
-    this.setState((prevState) => ({
-      ...prevState,
+    this.setState((prev) => ({
+      ...prev,
       isTyping: false,
     }));
   };
@@ -30,24 +32,30 @@ class ActionProvider {
     this.showTypingIndicator();
 
     try {
-      const proxyUrl = "https://cors-anywhere.herokuapp.com/";
       const apiUrl = "https://sentiment-analysis-backend.gentleforest-3f29c387.southindia.azurecontainerapps.io/gpt/ask";
       const requestBody = JSON.stringify({ question: message });
-      console.log("Request URL:", proxyUrl + apiUrl);
+      console.log("Request URL:", apiUrl);
       console.log("Request body (stringified):", requestBody);
 
-      const response = await fetch(proxyUrl + apiUrl, {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+      const minDelay = new Promise((resolve) => setTimeout(resolve, 1000)); // 1s minimum delay
+
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: requestBody,
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       console.log("Response status:", response.status);
 
       if (!response.ok) {
-        const errorText = await response.text(); // Capture the error response body
+        const errorText = await response.text();
         console.error("Error response from API:", errorText);
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -60,47 +68,62 @@ class ActionProvider {
       } else {
         const rawText = await response.text();
         console.warn("Unexpected content type. Raw response:", rawText);
-        throw new Error("Response is not valid JSON.");
+        data = { answer: rawText };
       }
 
       const answer = data?.answer || "Sorry, I didn’t get a valid reply from the server.";
       console.log("Full API Response:", data);
       console.log("GPT API Answer:", answer);
 
-      const botMessage = this.createChatBotMessage(answer);
+      await minDelay;
+
+      const botMessage = createMessageWithId(answer, { withAvatar: false });
+      console.log("Created botMessage with ID:", botMessage.id); // Debug log
       this.setState((prev) => {
         const newState = {
           ...prev,
           messages: [...prev.messages, botMessage],
           isTyping: false,
         };
-        console.log("Updated state:", newState);
+        console.log("Updated state with new message ID:", botMessage.id, "State:", newState);
         return newState;
       });
     } catch (error) {
       console.error("API Error:", error.message);
       console.error("Error stack:", error.stack);
-      this.handleError();
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      this.handleError(error);
     }
   };
 
   handleEmptyMessage = () => {
     console.log("Handling empty message");
-    const botMessage = this.createChatBotMessage("Please type something to chat with me!");
-    this.setState((prev) => ({
-      ...prev,
-      messages: [...prev.messages, botMessage],
-    }));
+    const botMessage = createMessageWithId("Please type something to chat with me!", { withAvatar: false });
+    console.log("Created botMessage with ID (empty message):", botMessage.id); // Debug log
+    this.setState((prev) => {
+      const newState = {
+        ...prev,
+        messages: [...prev.messages, botMessage],
+        isTyping: false,
+      };
+      console.log("Updated state with new message ID (empty message):", botMessage.id, "State:", newState);
+      return newState;
+    });
   };
 
-  handleError = () => {
-    console.log("Handling error");
-    this.hideTypingIndicator();
-    const botMessage = this.createChatBotMessage("Sorry, something went wrong. Please try again.");
-    this.setState((prev) => ({
-      ...prev,
-      messages: [...prev.messages, botMessage],
-    }));
+  handleError = (error = new Error("Unknown error")) => {
+    console.log("Handling error:", error.message);
+    const botMessage = createMessageWithId(`Sorry, something went wrong: ${error.message}. Please try again.`, { withAvatar: false });
+    console.log("Created botMessage with ID (error):", botMessage.id); // Debug log
+    this.setState((prev) => {
+      const newState = {
+        ...prev,
+        messages: [...prev.messages, botMessage],
+        isTyping: false,
+      };
+      console.log("Updated state with new message ID (error):", botMessage.id, "State:", newState);
+      return newState;
+    });
   };
 }
 

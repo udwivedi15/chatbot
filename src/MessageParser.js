@@ -6,22 +6,20 @@ class MessageParser {
 
   parse(message) {
     try {
-      console.log("MessageParser received message:", message); // Add log to confirm message receipt
-      const lowerCaseMessage = message.toLowerCase().trim();
-      if (!lowerCaseMessage) {
-        console.log("Empty message detected, calling handleEmptyMessage");
+      console.log("MessageParser received message:", message);
+
+      const trimmedMessage = message?.toLowerCase().trim();
+
+      if (!trimmedMessage) {
+        console.warn("Empty message detected. Triggering empty message handler.");
         this.actionProvider.handleEmptyMessage();
         return;
       }
 
-      // Show typing indicator immediately
-      this.actionProvider.showTypingIndicator();
-
-      // Call GPT-based backend directly
-      console.log("Passing message to ActionProvider:", lowerCaseMessage);
-      this.actionProvider.handleMessage(lowerCaseMessage);
+      console.log("Sending to ActionProvider:", trimmedMessage);
+      this.actionProvider.handleMessage(trimmedMessage);
     } catch (error) {
-      console.error("Error parsing message:", error);
+      console.error("Error in MessageParser.parse:", error);
       this.actionProvider.handleError();
     }
   }

@@ -2,6 +2,9 @@ import { createChatBotMessage } from 'react-chatbot-kit';
 import React from 'react';
 import './App.css';
 
+// Counter for generating unique message IDs
+let messageIdCounter = 0;
+
 // Custom Bot Message Component
 const CustomBotMessage = (props) => {
   const now = new Date();
@@ -11,36 +14,12 @@ const CustomBotMessage = (props) => {
     hour12: true,
   });
 
-  const handleCopyClick = () => {
-    props.onCopy?.(props.id, props.message);
-  };
-
-  const handleLikeClick = () => {
-    props.onLike?.(props.id);
-  };
-
   return (
     <div className="react-chatbot-kit-chat-bot-message">
       <div className="react-chatbot-kit-chat-bot-message-container">
         <span className="bot-text-wrapper">{props.message}</span>
         <span className="message-time-internal">{time}</span>
-
-        <div className="message-options">
-          <button
-            className={`option-button like-button ${props.isLiked ? 'liked' : ''}`}
-            onClick={handleLikeClick}
-            title="Like"
-          >
-            👍
-          </button>
-          <button
-            className={`option-button copy-button ${props.isCopied ? 'copied' : ''}`}
-            onClick={handleCopyClick}
-            title={props.isCopied ? "Copied!" : "Copy"}
-          >
-            📋
-          </button>
-        </div>
+        <div className="message-options"></div>
       </div>
       <div className="message-metadata">
         <span className="message-time">{time}</span>
@@ -70,16 +49,26 @@ const CustomUserMessage = (props) => {
   );
 };
 
-const createMessageWithId = (text, options = {}) => {
+export const createMessageWithId = (text, options = {}) => {
+  const message = createChatBotMessage(text, {
+    ...options,
+  });
+  const uniqueId = `msg_${messageIdCounter++}`;
+  console.log(`Generated message ID: ${uniqueId} for text: "${text}"`); // Debug log
   return {
-    ...createChatBotMessage(text, options),
-    id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    ...message,
+    id: uniqueId,
   };
 };
 
+const botMessage = createMessageWithId("Hi! I can help you understand and explore the data. What would you like to know?", {
+  delay: 500,
+  withAvatar: false,
+});
+
 const config = {
   initialMessages: [
-    createMessageWithId("Hey! I'm here to help you.", { delay: 500 }),
+    botMessage,
   ],
   customComponents: {
     botChatMessage: CustomBotMessage,
@@ -97,5 +86,3 @@ const config = {
 };
 
 export default config;
-
-
