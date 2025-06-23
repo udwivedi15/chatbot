@@ -6,6 +6,8 @@ import config from "./config";
 import MessageParser from "./MessageParser";
 import ActionProvider from "./ActionProvider";
 import React from "react";
+import Fab from '@mui/material/Fab';
+import SVGComponent from './components/ChatIcon'; // Adjust path if different
 
 function App({ onReady }) {
   const [darkMode, setDarkMode] = useState(() => {
@@ -13,25 +15,34 @@ function App({ onReady }) {
     return savedDarkMode === "true";
   });
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true); // Changed to true to show floating button initially
   const [isClosed, setIsClosed] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [likedMessages, setLikedMessages] = useState({});
   const [dislikedMessages, setDislikedMessages] = useState({});
-  const [copyStatus, setCopyStatus] = useState({});
   const [isTyping, setIsTyping] = useState(false);
   const [chatbotKey, setChatbotKey] = useState(Date.now());
-  const [messages, setMessages] = useState([]); // Track messages to detect new ones
-  const [hasScrolledUp, setHasScrolledUp] = useState(false); // Track if user has scrolled up
+  const trueContainerRef = useRef(null);
+  // const [setShowButton] = useState(false);
+
+  const [messages, setMessages] = useState(() => {
+    const savedMessages = localStorage.getItem("chatHistory");
+    try {
+      return savedMessages ? JSON.parse(savedMessages) : config.initialMessages || [];
+    } catch (err) {
+      console.error("Failed to parse chatHistory:", err);
+      return config.initialMessages || [];
+    }
+  });
+  const [hasScrolledUp, setHasScrolledUp] = useState(false);
   const chatContainerRef = useRef(null);
 
   const handleCopy = async (messageId, message) => {
-    console.log("handleCopy called for messageId:", messageId); // Debug log
+    console.log("handleCopy called for messageId:", messageId);
     const text = typeof message === "string" ? message : message.toString();
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(text);
-        setCopyStatus({ [messageId]: "Copied!" }); // Clear other statuses, set only for this message
       } else {
         const textarea = document.createElement("textarea");
         textarea.value = text;
@@ -39,23 +50,9 @@ function App({ onReady }) {
         textarea.select();
         document.execCommand("copy");
         document.body.removeChild(textarea);
-        setCopyStatus({ [messageId]: "Copied!" }); // Clear other statuses, set only for this message
       }
-      setTimeout(() => {
-        setCopyStatus((prev) => {
-          console.log("Clearing copyStatus for messageId:", messageId); // Debug log
-          return { ...prev, [messageId]: undefined }; // Clear only this message's status
-        });
-      }, 2000);
     } catch (err) {
       console.error("Failed to copy text:", err.message);
-      setCopyStatus({ [messageId]: "Failed to copy: Not supported" }); // Set error for this message only
-      setTimeout(() => {
-        setCopyStatus((prev) => {
-          console.log("Clearing copyStatus for messageId:", messageId); // Debug log
-          return { ...prev, [messageId]: undefined }; // Clear error status
-        });
-      }, 2000);
     }
   };
 
@@ -68,11 +65,11 @@ function App({ onReady }) {
           const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
           const isNotAtBottom = scrollHeight - scrollTop - clientHeight > 10;
           setShowScrollButton(isNotAtBottom);
-          setHasScrolledUp(isNotAtBottom); // Update hasScrolledUp based on position
+          setHasScrolledUp(isNotAtBottom);
         }
       }, 100);
     };
-  }, [setShowScrollButton, setHasScrolledUp]); // Include state setters as dependencies
+  }, []);
 
   useEffect(() => {
     if (onReady) onReady();
@@ -121,9 +118,9 @@ function App({ onReady }) {
 
   const handleClose = () => {
     localStorage.removeItem("chatHistory");
+    setMessages(config.initialMessages || []);
     setLikedMessages({});
     setDislikedMessages({});
-    setCopyStatus({});
     setChatbotKey(Date.now());
     setTimeout(() => {
       setIsClosed(true);
@@ -134,7 +131,9 @@ function App({ onReady }) {
     setIsMinimized(false);
     setIsClosed(false);
     setIsFullscreen(false);
-    setChatbotKey(Date.now());
+    if (messages.length === 0) {
+      setMessages(config.initialMessages || []);
+    }
   };
 
   const toggleDarkMode = () => {
@@ -144,24 +143,22 @@ function App({ onReady }) {
   const scrollToBottom = () => {
     setTimeout(() => {
       if (chatContainerRef.current) {
-        chatContainerRef.current.scrollTo({
-          top: chatContainerRef.current.scrollHeight,
+        chatContainerRef.current.appendTo({
+          top: trueContainerRef.current.scrollHeight,
           behavior: "smooth",
         });
         setShowScrollButton(false);
-        setHasScrolledUp(false); // Reset hasScrolledUp when manually scrolling to bottom
+        setHasScrolledUp(false);
       }
     }, 100);
   };
 
-  // Scroll to bottom when new messages are added, but only if the user hasn't scrolled up
   useEffect(() => {
     if (chatContainerRef.current && messages.length > 0 && !hasScrolledUp) {
-      chatContainerRef.current.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
+      chatContainerRef.current.appendTo({
+        top:       chatContainerRef.current.scrollHeight,
         behavior: "smooth",
       });
-      setShowScrollButton(false);
     }
   }, [messages, hasScrolledUp]);
 
@@ -177,7 +174,9 @@ function App({ onReady }) {
           <div className="chatbot-wrapper">
             <div className="chatbot-container">
               <div className="chat-header">
-                <div className="header-title">Chatbot</div>
+                <div className="header-title">
+                  Chatbot
+                </div>
                 <div className="header-buttons">
                   <button onClick={toggleDarkMode} className="dark-mode-toggle" title={darkMode ? "Light Mode" : "Dark Mode"}>
                     {darkMode ? (
@@ -241,6 +240,7 @@ function App({ onReady }) {
                 key={chatbotKey}
                 config={{
                   ...config,
+                  initialMessages: messages.length === 0 ? config.initialMessages : [],
                   customComponents: {
                     ...config.customComponents,
                     header: () => (
@@ -257,8 +257,7 @@ function App({ onReady }) {
                       </div>
                     ),
                     botChatMessage: (props) => {
-                      console.log("Rendering botChatMessage with props:", props); // Detailed debug log
-                      console.log("props.id:", props.id, "copyStatus:", copyStatus, "copyStatus[props.id]:", copyStatus[props.id]); // Debug log
+                      console.log("Rendering botChatMessage with props:", props);
                       return (
                         <div className="bot-message-wrapper">
                           <config.customComponents.botChatMessage {...props} />
@@ -303,72 +302,41 @@ function App({ onReady }) {
                                 <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7L2.34 13a2 2 0 0 0 2 2.3zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3" />
                               </svg>
                             </button>
-                            <div style={{ display: "flex", alignItems: "center" }}>
-                              <button
-                                onClick={() => handleCopy(props.id, props.message)}
-                                className="icon-button copy-button"
-                                type="button"
-                                aria-label="Copy"
+                            <button
+                              onClick={() => handleCopy(props.id, props.message)}
+                              className="icon-button copy-button"
+                              type="button"
+                              aria-label="Copy"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="feather feather-copy"
                               >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="18"
-                                  height="18"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  className="feather feather-copy"
-                                >
-                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                </svg>
-                              </button>
-                              {copyStatus[props.id] && (
-                                copyStatus[props.id] === "Copied!" ? (
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="#28a745"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    style={{ marginLeft: "5px" }}
-                                  >
-                                    <polyline points="20 6 9 17 4 12" />
-                                  </svg>
-                                ) : (
-                                  <span
-                                    style={{
-                                      marginLeft: "5px",
-                                      fontSize: "12px",
-                                      color: "#dc3545",
-                                    }}
-                                  >
-                                    {copyStatus[props.id]}
-                                  </span>
-                                )
-                              )}
-                            </div>
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg>
+                            </button>
                           </div>
                         </div>
                       );
                     },
                   },
-                  state: { ...config.state, setIsTyping },
+                  state: { ...config.state, setIsTyping, messages },
                 }}
                 messageParser={MessageParser}
                 actionProvider={ActionProvider}
                 saveMessages={(newMessages) => {
                   if (!isClosed) {
                     localStorage.setItem("chatHistory", JSON.stringify(newMessages));
-                    setMessages(newMessages); // Update messages state to trigger scroll
-                    setChatbotKey(Date.now()); // Force re-render to ensure unique message rendering
+                    setMessages(newMessages);
                   }
                 }}
               />
@@ -395,21 +363,15 @@ function App({ onReady }) {
       )}
 
       {(isClosed || isMinimized) && (
-        <button className="floating-widget-button" onClick={handleWidgetClick}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#000000"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-        </button>
+        <Fab
+          color="primary"
+          aria-label="chat"
+          className="fab-custom"
+          onClick={handleWidgetClick}
+          style={{ backgroundColor: '#FFE600', color: '#000000' }}
+        >
+          <SVGComponent className="fab-icon" />
+        </Fab>
       )}
     </>
   );
