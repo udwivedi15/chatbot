@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./App.css";
 import Chatbot from "react-chatbot-kit";
 import "react-chatbot-kit/build/main.css";
@@ -17,12 +17,10 @@ function App({ onReady }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(true); // Changed to true to show floating button initially
   const [isClosed, setIsClosed] = useState(false);
-  const [showScrollButton, setShowScrollButton] = useState(false);
   const [likedMessages, setLikedMessages] = useState({});
   const [dislikedMessages, setDislikedMessages] = useState({});
   const [isTyping, setIsTyping] = useState(false);
   const [chatbotKey, setChatbotKey] = useState(Date.now());
-  const trueContainerRef = useRef(null);
   // const [setShowButton] = useState(false);
 
   const [messages, setMessages] = useState(() => {
@@ -34,7 +32,6 @@ function App({ onReady }) {
       return config.initialMessages || [];
     }
   });
-  const [hasScrolledUp, setHasScrolledUp] = useState(false);
   const chatContainerRef = useRef(null);
 
   const handleCopy = async (messageId, message) => {
@@ -56,20 +53,7 @@ function App({ onReady }) {
     }
   };
 
-  const handleScroll = useCallback(() => {
-    let timeout;
-    return () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        if (chatContainerRef.current) {
-          const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
-          const isNotAtBottom = scrollHeight - scrollTop - clientHeight > 10;
-          setShowScrollButton(isNotAtBottom);
-          setHasScrolledUp(isNotAtBottom);
-        }
-      }, 100);
-    };
-  }, []);
+
 
   useEffect(() => {
     if (onReady) onReady();
@@ -85,16 +69,10 @@ function App({ onReady }) {
     const chatContainer = document.querySelector(".react-chatbot-kit-chat-message-container");
     if (chatContainer) {
       chatContainerRef.current = chatContainer;
-      chatContainer.addEventListener("scroll", handleScroll());
-      handleScroll()();
+    } else {
+      console.warn("Chat container not found. Ensure .react-chatbot-kit-chat-message-container exists.");
     }
-
-    return () => {
-      if (chatContainerRef.current) {
-        chatContainerRef.current.removeEventListener("scroll", handleScroll());
-      }
-    };
-  }, [darkMode, onReady, isClosed, handleScroll]);
+  }, [darkMode, onReady, isClosed]);
 
   const handleLike = (messageId) => {
     setLikedMessages((prev) => ({ ...prev, [messageId]: !prev[messageId] }));
@@ -140,28 +118,6 @@ function App({ onReady }) {
     setDarkMode((prevMode) => !prevMode);
   };
 
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      if (chatContainerRef.current) {
-        chatContainerRef.current.appendTo({
-          top: trueContainerRef.current.scrollHeight,
-          behavior: "smooth",
-        });
-        setShowScrollButton(false);
-        setHasScrolledUp(false);
-      }
-    }, 100);
-  };
-
-  useEffect(() => {
-    if (chatContainerRef.current && messages.length > 0 && !hasScrolledUp) {
-      chatContainerRef.current.appendTo({
-        top:       chatContainerRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [messages, hasScrolledUp]);
-
   const formattedDate = new Date().toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -178,7 +134,7 @@ function App({ onReady }) {
                   Chatbot
                 </div>
                 <div className="header-buttons">
-                  <button onClick={toggleDarkMode} className="dark-mode-toggle" title={darkMode ? "Light Mode" : "Dark Mode"}>
+                  <button onClick={toggleDarkMode} className="dark-mode-toggle" title={darkMode ? "Light Mode" : "Dark Mode"} >
                     {darkMode ? (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -348,14 +304,6 @@ function App({ onReady }) {
                     <span></span>
                   </div>
                 </div>
-              )}
-              {showScrollButton && (
-                <button
-                  className={`scroll-to-bottom ${!showScrollButton ? "hidden" : ""}`}
-                  onClick={scrollToBottom}
-                >
-                  ↓
-                </button>
               )}
             </div>
           </div>
