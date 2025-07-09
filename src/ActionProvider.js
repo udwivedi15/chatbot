@@ -8,23 +8,31 @@ class ActionProvider {
   }
 
   showTypingIndicator = () => {
-    this.setState((prev) => ({
-      ...prev,
-      isTyping: true,
-    }));
+    console.log("ActionProvider: Showing loader");
+    this.setState((prev) => {
+      console.log("ActionProvider: Setting isTyping to true");
+      return {
+        ...prev,
+        isTyping: true,
+      };
+    });
   };
 
   hideTypingIndicator = () => {
-    this.setState((prev) => ({
-      ...prev,
-      isTyping: false,
-    }));
+    console.log("ActionProvider: Hiding loader");
+    this.setState((prev) => {
+      console.log("ActionProvider: Setting isTyping to false");
+      return {
+        ...prev,
+        isTyping: false,
+      };
+    });
   };
 
   handleMessage = async (message) => {
     console.log("ActionProvider handleMessage called with:", message);
-    if (!message || typeof message !== "string") {
-      console.error("Invalid message:", message);
+    if (!message || typeof message !== "string" || message.trim() === "") {
+      console.error("Invalid or empty message:", message);
       this.handleEmptyMessage();
       return;
     }
@@ -40,7 +48,7 @@ class ActionProvider {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-      const minDelay = new Promise((resolve) => setTimeout(resolve, 1000)); // 1s minimum delay
+      const minDelay = new Promise((resolve) => setTimeout(resolve, 5000)); // 5s minimum delay for loader
 
       const response = await fetch(apiUrl, {
         method: "POST",
@@ -78,7 +86,7 @@ class ActionProvider {
       await minDelay;
 
       const botMessage = createMessageWithId(answer, { withAvatar: false });
-      console.log("Created botMessage with ID:", botMessage.id); // Debug log
+      console.log("Created botMessage with ID:", botMessage.id);
       this.setState((prev) => {
         const newState = {
           ...prev,
@@ -91,15 +99,17 @@ class ActionProvider {
     } catch (error) {
       console.error("API Error:", error.message);
       console.error("Error stack:", error.stack);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // 5s delay for error
       this.handleError(error);
     }
   };
 
-  handleEmptyMessage = () => {
+  handleEmptyMessage = async () => {
     console.log("Handling empty message");
+    this.showTypingIndicator();
+    await new Promise((resolve) => setTimeout(resolve, 5000)); // 5s delay
     const botMessage = createMessageWithId("Please type something to chat with me!", { withAvatar: false });
-    console.log("Created botMessage with ID (empty message):", botMessage.id); // Debug log
+    console.log("Created botMessage with ID (empty message):", botMessage.id);
     this.setState((prev) => {
       const newState = {
         ...prev,
@@ -111,10 +121,12 @@ class ActionProvider {
     });
   };
 
-  handleError = (error = new Error("Unknown error")) => {
+  handleError = async (error = new Error("Unknown error")) => {
     console.log("Handling error:", error.message);
+    this.showTypingIndicator();
+    await new Promise((resolve) => setTimeout(resolve, 5000)); // 5s delay
     const botMessage = createMessageWithId(`Sorry, something went wrong: ${error.message}. Please try again.`, { withAvatar: false });
-    console.log("Created botMessage with ID (error):", botMessage.id); // Debug log
+    console.log("Created botMessage with ID (error):", botMessage.id);
     this.setState((prev) => {
       const newState = {
         ...prev,

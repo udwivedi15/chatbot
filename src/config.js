@@ -28,6 +28,7 @@ const CustomBotMessage = (props) => {
   );
 };
 
+// Custom User Message Component
 const CustomUserMessage = (props) => {
   const now = new Date();
   const time = now.toLocaleTimeString('en-US', {
@@ -70,6 +71,10 @@ const config = {
   initialMessages: [
     botMessage,
   ],
+  state: {
+    setIsTyping: () => {}, // Placeholder, will be overridden in App.js
+    messages: [], // Placeholder, will be overridden in App.js
+  },
   customComponents: {
     botChatMessage: CustomBotMessage,
     userChatMessage: CustomUserMessage,

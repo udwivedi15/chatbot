@@ -131,7 +131,7 @@ function App({ onReady }) {
             <div className="chatbot-container">
               <div className="chat-header">
                 <div className="header-title">
-                  Chatbot
+                  Omnichannel Brand Listening Agent
                 </div>
                 <div className="header-buttons">
                   <button onClick={toggleDarkMode} className="dark-mode-toggle" title={darkMode ? "Light Mode" : "Dark Mode"} >
